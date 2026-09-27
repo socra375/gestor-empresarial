@@ -4,6 +4,7 @@
   import { createTelegramLinkCode } from '../../api/businessAccess';
   import { fmtDate, fmtTime } from '../../utils/format';
   import { teamWhatsappHref } from '../../utils/whatsapp';
+  import { legalHref } from '../../utils/legal';
   import type { BusinessPlan } from '../../types/businessAccess';
   import type { TranslationKey } from '../../i18n';
 
@@ -124,7 +125,10 @@
         </div>
       {/each}
     </div>
-    <p class="plan-note">{$t('cfg.plan_compare_note')}</p>
+    <p class="plan-note">
+      {$t('cfg.plan_compare_note')}
+      <a href={legalHref('reembolsos')}>{$t('cfg.plan_refunds_link')}</a>
+    </p>
 
     <a href={whatsappHref} target="_blank" rel="noopener noreferrer" role="button">
       {$t('cfg.plan_button')}

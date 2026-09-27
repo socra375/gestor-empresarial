@@ -1,4 +1,7 @@
 <script lang="ts">
+  import LegalFooter from '../legal/LegalFooter.svelte';
+  import { legalHref } from '../../utils/legal';
+
   interface Props {
     onEnter: () => void;
   }
@@ -48,7 +51,7 @@
         <h2>Todo lo que necesitas para administrar tu salón</h2>
         <div class="list">
           <div class="item"><div class="ico" aria-hidden="true">💇</div><h3>Servicios</h3><p>Tu catálogo con precio y duración.</p></div>
-          <div class="item"><div class="ico" aria-hidden="true">📅</div><h3>Agenda</h3><p>Citas por día y por persona, sin cruces.</p></div>
+          <div class="item"><div class="ico" aria-hidden="true">📅</div><h3>Agenda</h3><p>Citas por día y por persona.</p></div>
           <div class="item"><div class="ico" aria-hidden="true">👥</div><h3>Clientes</h3><p>Contacto e historial de cada visita.</p></div>
           <div class="item"><div class="ico" aria-hidden="true">💳</div><h3>Pagos</h3><p>Cobros y saldos pendientes al día.</p></div>
           <div class="item"><div class="ico" aria-hidden="true">🧾</div><h3>Facturas</h3><p>Comprobantes listos para enviar.</p></div>
@@ -140,7 +143,7 @@
           </div>
 
           <div class="plan-card featured">
-            <span class="plan-badge">Más popular</span>
+            <span class="plan-badge">Recomendado</span>
             <h3>6 Meses</h3>
             <p class="plan-tag">Para negocios en crecimiento</p>
             <p class="plan-price"><span class="amount">$100</span><span class="period">/6 meses</span></p>
@@ -156,11 +159,11 @@
           </div>
 
           <div class="plan-card">
-            <span class="plan-badge plan-badge-gold">Mejor valor</span>
+            <span class="plan-badge plan-badge-gold">Menor precio por mes</span>
             <h3>Anual</h3>
             <p class="plan-tag">El plan completo</p>
             <p class="plan-price"><span class="amount">$200</span><span class="period">/año</span></p>
-            <p class="plan-equiv">Incluye 1 mes gratis · $15.38/mes</p>
+            <p class="plan-equiv">13 meses por $200 (1 mes gratis) · $15.38/mes</p>
             <ul class="plan-features">
               <li>Más de 150 clientes</li>
               <li>Todo lo del plan 6 Meses</li>
@@ -171,8 +174,9 @@
         </div>
 
         <p class="plans-note">
-          Precios en dólares estadounidenses. ¿Ya tenés cuenta y querés cambiar de plan?
-          <a href={plansWhatsappHref} target="_blank" rel="noopener noreferrer">Escribinos por WhatsApp</a>.
+          Precios en dólares estadounidenses. Pagos no reembolsables: probá gratis antes de pagar y cancelá cuando
+          quieras (ver <a href={legalHref('reembolsos')}>Política de reembolsos</a>). ¿Ya tenés cuenta y querés cambiar
+          de plan? <a href={plansWhatsappHref} target="_blank" rel="noopener noreferrer">Escribinos por WhatsApp</a>.
         </p>
       </div>
     </section>
@@ -190,6 +194,7 @@
   <footer>
     <div class="wrap">
       Gestor Empresarial · <button type="button" class="link-inline" onclick={onEnter}>Acceder a mi cuenta</button>
+      <div class="landing-legal"><LegalFooter /></div>
     </div>
   </footer>
 </div>
@@ -899,6 +904,10 @@
 
   .closing .actions {
     justify-content: center;
+  }
+
+  .landing-legal {
+    margin-top: 12px;
   }
 
   footer {

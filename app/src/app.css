@@ -547,3 +547,9 @@ td {
   gap: 0.15rem;
   font-size: 0.95rem;
 }
+
+/* Pie legal chico al final de la app (Términos, Privacidad, aviso de IA). */
+.app-legal {
+  padding: 1.5rem 1.25rem 1rem;
+  text-align: center;
+}

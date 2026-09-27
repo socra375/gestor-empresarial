@@ -17,6 +17,10 @@
   import { showLoader, hideLoader } from './lib/stores/loader';
   import { readPendingInviteFromUrl, resolveSessionAfterLogin, signOut, type PendingInvite } from './lib/actions/auth';
   import Loader from './lib/components/shared/Loader.svelte';
+  import LegalScreen from './lib/components/legal/LegalScreen.svelte';
+  import LegalFooter from './lib/components/legal/LegalFooter.svelte';
+  import StorageNotice from './lib/components/legal/StorageNotice.svelte';
+  import { parseLegalHash } from './lib/utils/legal';
   import LandingScreen from './lib/components/auth/LandingScreen.svelte';
   import AuthScreen from './lib/components/auth/AuthScreen.svelte';
   import OnboardingScreen from './lib/components/auth/OnboardingScreen.svelte';
@@ -70,6 +74,14 @@
   showLoader('boot');
 
   let ready = $state(false);
+  // Documentos legales por hash (#/terminos, #/privacidad...): se pueden
+  // abrir con o sin sesión y compartir por link.
+  let legalDoc = $state(parseLegalHash(window.location.hash));
+
+  function handleHashChange() {
+    legalDoc = parseLegalHash(window.location.hash);
+    if (legalDoc) window.scrollTo(0, 0);
+  }
   let resolving = $state(false);
   let pendingInvite = $state<PendingInvite | null>(null);
   let inviteError = $state<string | null>(null);
@@ -140,9 +152,10 @@
   }
 
   onMount(() => {
+    window.addEventListener('hashchange', handleHashChange);
     if (!isSupabaseConfigured) {
       finishBoot();
-      return;
+      return () => window.removeEventListener('hashchange', handleHashChange);
     }
 
     pendingInvite = readPendingInviteFromUrl(new URL(window.location.href));
@@ -195,6 +208,7 @@
     return () => {
       subscription.unsubscribe();
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('hashchange', handleHashChange);
       clearInterval(activityIntervalId);
     };
   });
@@ -208,6 +222,8 @@
 
 {#if !ready}
   <!-- El overlay de Loader ya cubre este estado. -->
+{:else if legalDoc}
+  <LegalScreen doc={legalDoc} />
 {:else if !isSupabaseConfigured}
   <main>
     <h1>Gestión Salón</h1>
@@ -225,6 +241,7 @@
     {/if}
     <AuthScreen {pendingInvite} />
   {/if}
+  <StorageNotice />
 {:else if $isBusinessBlocked}
   <BlockedScreen />
 {:else if $needsOnboarding}
@@ -303,6 +320,7 @@
           <EmployeesScreen />
         {/if}
       </main>
+      <div class="app-legal"><LegalFooter variant="dark" compact /></div>
     </div>
   </div>
 {:else}
@@ -328,4 +346,5 @@
   <main>
     <DashboardScreen onNavigate={handleDashboardNavigate} />
   </main>
+  <div class="app-legal"><LegalFooter variant="dark" compact /></div>
 {/if}

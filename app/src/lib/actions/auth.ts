@@ -14,6 +14,7 @@ import {
 } from '../stores/session';
 import { LOCKED_STATUSES } from '../types/businessAccess';
 import type { Tables, TablesInsert } from '../types/database.types';
+import { LEGAL_VERSION } from '../utils/legal';
 
 export interface PendingInvite {
   code: string;
@@ -60,7 +61,12 @@ export async function signInOrSignUp(params: {
   const { error: signUpError } = await supabase.auth.signUp({
     email: params.email,
     password: params.password,
-    options: { emailRedirectTo: redirectUrl },
+    options: {
+      emailRedirectTo: redirectUrl,
+      // Constancia de aceptación de Términos y Privacidad (el formulario no deja
+      // registrarse sin marcarla): queda en auth.users.raw_user_meta_data.
+      data: { terms_accepted_at: new Date().toISOString(), terms_version: LEGAL_VERSION },
+    },
   });
   if (signUpError) return { status: 'error', error: signUpError };
   return { status: 'signup_email_sent' };

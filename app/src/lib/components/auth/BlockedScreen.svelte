@@ -3,6 +3,7 @@
   import { businessAccess } from '../../stores/session';
   import { signOut } from '../../actions/auth';
   import { teamWhatsappHref } from '../../utils/whatsapp';
+  import LegalFooter from '../legal/LegalFooter.svelte';
 
   const status = $derived($businessAccess?.status ?? 'expired');
   const reason = $derived($businessAccess?.reason ?? null);
@@ -27,6 +28,7 @@
       <a href={whatsappHref} target="_blank" rel="noopener noreferrer" role="button">{$t('blocked.contact')}</a>
       <button type="button" class="secondary" onclick={() => signOut()}>{$t('blocked.logout')}</button>
     </div>
+    <div class="blocked-legal"><LegalFooter compact /></div>
   </main>
 </div>
 
@@ -40,6 +42,10 @@
     justify-content: center;
     padding: 32px 16px;
     background: linear-gradient(135deg, #2e0a1e 0%, #5b1a3b 55%, #8a2f55 100%);
+  }
+
+  .blocked-legal {
+    margin-top: 24px;
   }
 
   .blocked-card {
