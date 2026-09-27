@@ -136,7 +136,10 @@
       <p>Solo con los proveedores necesarios para que la app funcione:</p>
       <ul>
         <li><strong>Supabase</strong>: base de datos, autenticación y almacenamiento de archivos (servidores en Estados Unidos, región us-west-2).</li>
-        <li><strong>GitHub Pages</strong>: aloja la página web.</li>
+        <li>
+          <strong>GitHub Pages</strong> y <strong>Vercel</strong>: alojan la página web (solo entregan los archivos de la
+          app; no ponen cookies ni analítica).
+        </li>
         <li><strong>Google</strong>: solo si eliges "Entrar con Google" (recibe tu solicitud de inicio de sesión).</li>
         <li><strong>WhatsApp</strong>: solo si tocas un botón de WhatsApp para escribirnos.</li>
         <li>

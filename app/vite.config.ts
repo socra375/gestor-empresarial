@@ -9,7 +9,11 @@ import { svelte } from '@sveltejs/vite-plugin-svelte';
 // Un `base` mal puesto aquí es exactamente el tipo de error que rompe todos
 // los assets en silencio recién hecho el corte de la Fase 7; por eso la
 // prueba de tests/e2e/base-path.spec.ts existe desde esta misma fase.
-const BASE = '/gestor-empresarial/';
+//
+// Vercel (segunda dirección, <proyecto>.vercel.app) sirve la app desde la
+// raíz del dominio y define VERCEL=1 durante su build; GitHub Actions, los
+// tests y `npm run dev` no la definen, así que siguen con el prefijo.
+const BASE = process.env.VERCEL ? '/' : '/gestor-empresarial/';
 
 export default defineConfig({
   base: BASE,
