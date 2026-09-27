@@ -56,6 +56,10 @@
 
       if (result.status === 'signup_email_sent') {
         statusMessage = { kind: 'success', text: $t('auth.signup_success') };
+      } else if (result.status === 'account_exists') {
+        statusMessage = { kind: 'error', text: $t('auth.account_exists') };
+      } else if (result.status === 'email_not_confirmed') {
+        statusMessage = { kind: 'error', text: $t('auth.email_not_confirmed') };
       } else if (result.status === 'error') {
         statusMessage = { kind: 'error', text: $t('auth.error', { msg: result.error.message }) };
       }

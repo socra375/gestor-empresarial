@@ -17,6 +17,8 @@
   "auth.error": "Authentifizierungsfehler: {{msg}}",
   "auth.signup_success": "Registrierung erfolgreich. Überprüfen Sie Ihre E-Mail (auf einem beliebigen Gerät), um Ihr Konto zu bestätigen.",
   "auth.invite_invalid": "Der Einladungscode ist ungültig oder wurde bereits verwendet: {{msg}}",
+  "auth.account_exists": "Sie haben bereits ein Konto mit dieser E-Mail, aber das Passwort stimmt nicht. Wenn Sie sich mit Google registriert haben, nutzen Sie „Mit Google anmelden“ (unter Mein Konto können Sie ein Passwort für die Anmeldung per E-Mail erstellen).",
+  "auth.email_not_confirmed": "Ihr Konto existiert, ist aber noch nicht bestätigt. Öffnen Sie den Link, den wir Ihnen bei der Registrierung geschickt haben, und versuchen Sie es erneut.",
   "onboarding.title": "Richten Sie Ihr Unternehmen ein",
   "onboarding.subtitle": "Drei Angaben und schon geht's los. Sie können sie später in den Einstellungen ändern.",
   "onboarding.business_name_label": "Name Ihres Unternehmens",

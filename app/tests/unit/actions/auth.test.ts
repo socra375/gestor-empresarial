@@ -142,6 +142,36 @@ describe('signInOrSignUp', () => {
 
     expect(result).toEqual({ status: 'error', error: { message: 'email ya registrado' } });
   });
+
+  const LOGIN = { email: 'ana@b.com', password: 'otra-clave', invite: null, redirectBaseUrl: 'https://app.test/' };
+
+  it('si el correo ya tiene cuenta (signUp sin identidades), avisa que existe en vez de "revisa tu correo"', async () => {
+    supabaseMock.auth.signInWithPassword.mockResolvedValue({ error: { message: 'Invalid login credentials', code: 'invalid_credentials' } });
+    supabaseMock.auth.signUp.mockResolvedValue({ data: { user: { id: 'u1', identities: [] } }, error: null });
+
+    expect(await signInOrSignUp(LOGIN)).toEqual({ status: 'account_exists' });
+  });
+
+  it('con la confirmación por correo apagada, user_already_exists también es "la cuenta existe"', async () => {
+    supabaseMock.auth.signInWithPassword.mockResolvedValue({ error: { message: 'Invalid login credentials', code: 'invalid_credentials' } });
+    supabaseMock.auth.signUp.mockResolvedValue({ data: { user: null }, error: { message: 'User already registered', code: 'user_already_exists' } });
+
+    expect(await signInOrSignUp(LOGIN)).toEqual({ status: 'account_exists' });
+  });
+
+  it('una cuenta sin confirmar no se vuelve a registrar ni dispara otro correo', async () => {
+    supabaseMock.auth.signInWithPassword.mockResolvedValue({ error: { message: 'Email not confirmed', code: 'email_not_confirmed' } });
+
+    expect(await signInOrSignUp(LOGIN)).toEqual({ status: 'email_not_confirmed' });
+    expect(supabaseMock.auth.signUp).not.toHaveBeenCalled();
+  });
+
+  it('un registro nuevo de verdad (con identidad) sigue pidiendo revisar el correo', async () => {
+    supabaseMock.auth.signInWithPassword.mockResolvedValue({ error: { message: 'Invalid login credentials', code: 'invalid_credentials' } });
+    supabaseMock.auth.signUp.mockResolvedValue({ data: { user: { id: 'u2', identities: [{ provider: 'email' }] } }, error: null });
+
+    expect(await signInOrSignUp(LOGIN)).toEqual({ status: 'signup_email_sent' });
+  });
 });
 
 describe('resolveSessionAfterLogin', () => {

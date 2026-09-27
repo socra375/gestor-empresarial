@@ -17,6 +17,8 @@
   "auth.error": "Errore di autenticazione: {{msg}}",
   "auth.signup_success": "Registrazione riuscita. Controlla la tua e-mail (su qualsiasi dispositivo) per confermare l'account.",
   "auth.invite_invalid": "Il codice di invito non è valido o è già stato utilizzato: {{msg}}",
+  "auth.account_exists": "Hai già un account con questa email, ma la password non corrisponde. Se ti sei registrato con Google, usa «Accedi con Google» (in Il Mio Account puoi creare una password per accedere con la tua email).",
+  "auth.email_not_confirmed": "Il tuo account esiste ma non è ancora confermato. Apri il link che ti abbiamo inviato alla registrazione e riprova.",
   "onboarding.title": "Configura la tua attività",
   "onboarding.subtitle": "Tre dati e sei pronto. Potrai modificarli quando vuoi nelle Impostazioni.",
   "onboarding.business_name_label": "Nome della tua attività",
