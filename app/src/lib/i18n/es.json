@@ -295,6 +295,7 @@
   "pdf.address_footer": "Dirección",
   "pdf.phone_footer": "Teléfono",
   "pdf.website_footer": "Sitio Web",
+  "pdf.non_fiscal": "Comprobante interno sin valor fiscal. No sustituye la factura o comprobante fiscal exigido por la autoridad tributaria (en República Dominicana, el e-CF de la DGII).",
   "emp.title": "Gestión de Empleados",
   "emp.invite_title": "Invitar Empleado",
   "emp.invite_hint": "Genera un código de acceso único para registrar nuevos estilistas/empleados.",

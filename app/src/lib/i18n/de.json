@@ -295,6 +295,7 @@
   "pdf.address_footer": "Adresse",
   "pdf.phone_footer": "Telefon",
   "pdf.website_footer": "Webseite",
+  "pdf.non_fiscal": "Interner Beleg ohne steuerliche Gültigkeit. Er ersetzt nicht die von der Steuerbehörde verlangte Rechnung bzw. den Steuerbeleg (in der Dominikanischen Republik das e-CF der DGII).",
   "emp.title": "Mitarbeiterverwaltung",
   "emp.invite_title": "Mitarbeiter einladen",
   "emp.invite_hint": "Erstellen Sie einen eindeutigen Zugangscode, um neue Stylisten/Mitarbeiter zu registrieren.",

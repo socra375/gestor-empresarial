@@ -295,6 +295,7 @@
   "pdf.address_footer": "Indirizzo",
   "pdf.phone_footer": "Telefono",
   "pdf.website_footer": "Sito Web",
+  "pdf.non_fiscal": "Ricevuta interna senza valore fiscale. Non sostituisce la fattura o il documento fiscale richiesto dall'autorità fiscale (nella Repubblica Dominicana, l'e-CF della DGII).",
   "emp.title": "Gestione Dipendenti",
   "emp.invite_title": "Invita Dipendente",
   "emp.invite_hint": "Genera un codice di accesso unico per registrare nuovi stilisti/dipendenti.",
