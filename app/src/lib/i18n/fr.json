@@ -3,7 +3,7 @@
   "header.logout": "Déconnexion",
   "header.role_admin": "Admin",
   "header.role_employee": "Employé",
-  "auth.subtitle": "Agenda, services et gestion administrative pour votre salon de beauté.",
+  "auth.subtitle": "Agenda, services et gestion administrative pour votre entreprise.",
   "auth.heading": "Accès au Gestionnaire",
   "auth.lead": "Connectez-vous avec votre compte.",
   "auth.email_label": "Adresse e-mail",

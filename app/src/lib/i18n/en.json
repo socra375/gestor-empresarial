@@ -3,7 +3,7 @@
   "header.logout": "Log Out",
   "header.role_admin": "Admin",
   "header.role_employee": "Employee",
-  "auth.subtitle": "Scheduling, services and administrative control for your beauty salon.",
+  "auth.subtitle": "Scheduling, services and administrative control for your business.",
   "auth.heading": "Sign In to the Manager",
   "auth.lead": "Sign in with your account.",
   "auth.email_label": "Email Address",
