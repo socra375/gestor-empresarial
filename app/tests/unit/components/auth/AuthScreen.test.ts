@@ -24,6 +24,7 @@ afterEach(() => {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  localStorage.clear();
 });
 
 describe('AuthScreen', () => {
@@ -150,6 +151,29 @@ describe('AuthScreen', () => {
     render(AuthScreen, { props: { pendingInvite: null } });
     expect(screen.getByRole('link', { name: 'Términos y condiciones' }).getAttribute('href')).toBe('#/terminos');
     expect(screen.getByRole('link', { name: 'Política de privacidad' }).getAttribute('href')).toBe('#/privacidad');
+  });
+
+  it('una vez aceptados los Términos, la casilla no vuelve a aparecer y se puede entrar directo', async () => {
+    authActionsMock.signInOrSignUp.mockResolvedValue({ status: 'signed_in' });
+    const first = render(AuthScreen, { props: { pendingInvite: null } });
+    await fireEvent.input(screen.getByLabelText('Correo Electrónico'), { target: { value: 'ana@test.com' } });
+    await fireEvent.input(screen.getByLabelText('Contraseña'), { target: { value: 'secret123' } });
+    await fireEvent.click(screen.getByRole('checkbox'));
+    await fireEvent.click(screen.getByRole('button', { name: 'Iniciar Sesión / Registrarse' }));
+    first.unmount();
+
+    render(AuthScreen, { props: { pendingInvite: null } });
+    expect(screen.queryByRole('checkbox')).toBeNull();
+    await fireEvent.input(screen.getByLabelText('Correo Electrónico'), { target: { value: 'ana@test.com' } });
+    await fireEvent.input(screen.getByLabelText('Contraseña'), { target: { value: 'secret123' } });
+    await fireEvent.click(screen.getByRole('button', { name: 'Iniciar Sesión / Registrarse' }));
+    expect(authActionsMock.signInOrSignUp).toHaveBeenCalledTimes(2);
+  });
+
+  it('si los documentos cambiaron de versión, la casilla vuelve a pedirse', () => {
+    localStorage.setItem('gestorTermsAccepted', '2020-01-01');
+    render(AuthScreen, { props: { pendingInvite: null } });
+    expect(screen.getByRole('checkbox')).toBeTruthy();
   });
 
   it('sin violaciones de accesibilidad (axe-core)', async () => {
