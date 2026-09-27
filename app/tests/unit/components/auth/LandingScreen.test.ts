@@ -9,7 +9,7 @@ afterEach(() => cleanup());
 describe('LandingScreen', () => {
   it('muestra el titular y las funciones principales', () => {
     render(LandingScreen, { props: { onEnter: vi.fn() } });
-    expect(screen.getByText('Organiza tu salón.')).toBeTruthy();
+    expect(screen.getByText('Organiza tu negocio.')).toBeTruthy();
     expect(screen.getByText('Agenda')).toBeTruthy();
     expect(screen.getByText('Servicios')).toBeTruthy();
   });
