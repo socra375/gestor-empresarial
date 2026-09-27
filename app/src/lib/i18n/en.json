@@ -295,6 +295,7 @@
   "pdf.address_footer": "Address",
   "pdf.phone_footer": "Phone",
   "pdf.website_footer": "Website",
+  "pdf.non_fiscal": "Internal receipt with no tax validity. It does not replace the invoice or tax receipt required by the tax authority (in the Dominican Republic, the DGII e-CF).",
   "emp.title": "Employee Management",
   "emp.invite_title": "Invite Employee",
   "emp.invite_hint": "Generate a unique access code to register new stylists/employees.",

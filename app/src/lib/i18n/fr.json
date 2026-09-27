@@ -295,6 +295,7 @@
   "pdf.address_footer": "Adresse",
   "pdf.phone_footer": "Téléphone",
   "pdf.website_footer": "Site Web",
+  "pdf.non_fiscal": "Reçu interne sans valeur fiscale. Il ne remplace pas la facture ou le justificatif fiscal exigé par l'administration fiscale (en République dominicaine, l'e-CF de la DGII).",
   "emp.title": "Gestion des Employés",
   "emp.invite_title": "Inviter un Employé",
   "emp.invite_hint": "Générez un code d'accès unique pour enregistrer de nouveaux coiffeurs/employés.",
