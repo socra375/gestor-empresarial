@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { t } from '../../stores/locale';
   import { getAccountInfo } from '../../actions/account';
-  import { setForcedPassword } from '../../actions/auth';
+  import { setForcedPassword, switchAccount } from '../../actions/auth';
 
   let avatarUrl = $state('');
   let name = $state('');
@@ -71,3 +71,9 @@
     <button type="submit" disabled={submitting}>{$t('pwd.save')}</button>
   </form>
 {/if}
+
+<section aria-labelledby="account-switch-title">
+  <h2 id="account-switch-title">{$t('acct.switch_title')}</h2>
+  <p>{$t('acct.switch_body')}</p>
+  <button type="button" onclick={() => switchAccount()}>{$t('acct.switch_btn')}</button>
+</section>

@@ -16,6 +16,7 @@ import { LOCKED_STATUSES, type PaidPlan } from '../types/businessAccess';
 import { getPendingTrial } from '../utils/pendingTrial';
 import type { Tables, TablesInsert } from '../types/database.types';
 import { LEGAL_VERSION } from '../utils/legal';
+import { requestAccountSwitch } from '../utils/landing';
 
 export interface PendingInvite {
   code: string;
@@ -95,12 +96,23 @@ export async function signInOrSignUp(params: {
 }
 
 export async function signInWithGoogle(redirectTo: string) {
-  return supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } });
+  // select_account: Google muestra siempre el selector de cuentas, así se
+  // puede elegir (o agregar) otra cuenta en vez de entrar con la última usada.
+  return supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo, queryParams: { prompt: 'select_account' } },
+  });
 }
 
 export async function signOut(): Promise<void> {
   await supabase.auth.signOut();
   resetSession();
+}
+
+/** "Agregar o cambiar cuenta": cierra la sesión y deja el formulario de acceso listo para otra cuenta. */
+export async function switchAccount(): Promise<void> {
+  requestAccountSwitch();
+  await signOut();
 }
 
 export interface ResolvedSession {
