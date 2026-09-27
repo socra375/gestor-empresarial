@@ -143,9 +143,9 @@
             <p class="plan-price"><span class="amount">$20</span><span class="period">/mes</span></p>
             <ul class="plan-features">
               <li>10 días de prueba gratis</li>
-              <li>Hasta 10–15 clientes</li>
-              <li>Agenda, clientes y servicios</li>
-              <li>Facturas en PDF</li>
+              <li>Hasta 15 clientes</li>
+              <li>Agenda, clientes, servicios y facturas en PDF</li>
+              <li>Equipo y estadísticas</li>
             </ul>
             <button type="button" class="btn btn-plan" onclick={() => onEnter('mensual')}>Probar gratis</button>
           </div>
@@ -157,10 +157,9 @@
             <p class="plan-price"><span class="amount">$100</span><span class="period">/6 meses</span></p>
             <p class="plan-equiv">Equivale a $16.67/mes</p>
             <ul class="plan-features">
-              <li>Hasta 50–90 clientes</li>
+              <li>Hasta 90 clientes</li>
               <li>Todo lo del plan Mensual</li>
-              <li>Equipo y empleados</li>
-              <li>Estadísticas del negocio</li>
+              <li>Ahorras $20 frente a 6 meses del Mensual</li>
             </ul>
             <a class="btn btn-plan btn-plan-primary" href={hireHref('Semestral (6 meses)')} target="_blank" rel="noopener noreferrer">Contratar</a>
           </div>
@@ -172,7 +171,7 @@
             <p class="plan-price"><span class="amount">$200</span><span class="period">/año</span></p>
             <p class="plan-equiv">13 meses por $200 (1 mes gratis) · $15.38/mes</p>
             <ul class="plan-features">
-              <li>Más de 150 clientes</li>
+              <li>Clientes ilimitados</li>
               <li>Todo lo del plan 6 Meses</li>
               <li>Asistente virtual <span class="soon">(próximamente)</span></li>
             </ul>
