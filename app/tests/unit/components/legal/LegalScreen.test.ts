@@ -28,6 +28,12 @@ describe('LegalScreen', () => {
     expect(container.textContent).toContain('Cancelar cuando quieras');
   });
 
+  it('Privacidad nombra a los dos alojamientos de la web (GitHub Pages y Vercel)', () => {
+    const { container } = render(LegalScreen, { props: { doc: 'privacidad' } });
+    expect(container.textContent).toContain('GitHub Pages');
+    expect(container.textContent).toContain('Vercel');
+  });
+
   it('enlaza a los otros tres documentos, no a sí mismo', () => {
     render(LegalScreen, { props: { doc: 'privacidad' } });
     const nav = screen.getByRole('navigation', { name: 'Documentos legales' });
