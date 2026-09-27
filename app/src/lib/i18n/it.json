@@ -3,7 +3,7 @@
   "header.logout": "Esci",
   "header.role_admin": "Admin",
   "header.role_employee": "Dipendente",
-  "auth.subtitle": "Agenda, servizi e gestione amministrativa per il tuo salone di bellezza.",
+  "auth.subtitle": "Agenda, servizi e gestione amministrativa per la tua attività.",
   "auth.heading": "Accesso al Gestore",
   "auth.lead": "Accedi con il tuo account.",
   "auth.email_label": "Indirizzo e-mail",
