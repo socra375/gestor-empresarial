@@ -5,11 +5,11 @@ import { expectNoA11yViolations } from '../../support/axe';
 const accountActionsMock = vi.hoisted(() => ({ getAccountInfo: vi.fn() }));
 vi.mock('../../../../src/lib/actions/account', () => accountActionsMock);
 
-const authActionsMock = vi.hoisted(() => ({ setForcedPassword: vi.fn() }));
+const authActionsMock = vi.hoisted(() => ({ setForcedPassword: vi.fn(), switchAccount: vi.fn() }));
 vi.mock('../../../../src/lib/actions/auth', async () => {
   const actual =
     await vi.importActual<typeof import('../../../../src/lib/actions/auth')>('../../../../src/lib/actions/auth');
-  return { ...actual, setForcedPassword: authActionsMock.setForcedPassword };
+  return { ...actual, setForcedPassword: authActionsMock.setForcedPassword, switchAccount: authActionsMock.switchAccount };
 });
 
 const { default: AccountTab } = await import('../../../../src/lib/components/settings/AccountTab.svelte');
@@ -22,6 +22,13 @@ beforeEach(() => {
 });
 
 describe('AccountTab', () => {
+  it('"Agregar o cambiar cuenta" cierra la sesión para entrar con otra', async () => {
+    render(AccountTab);
+    expect(screen.getByRole('heading', { name: 'Agregar o cambiar cuenta' })).toBeTruthy();
+    await fireEvent.click(screen.getByRole('button', { name: 'Agregar o cambiar cuenta' }));
+    expect(authActionsMock.switchAccount).toHaveBeenCalledTimes(1);
+  });
+
   it('muestra el nombre y correo del usuario autenticado', async () => {
     render(AccountTab);
     expect(await screen.findByText('Ana Pérez')).toBeTruthy();

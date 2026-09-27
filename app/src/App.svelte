@@ -215,8 +215,9 @@
             finishBoot();
           });
       } else {
-        if (showsLandingAfter(event)) {
-          showLanding = true;
+        if (event === 'SIGNED_OUT') {
+          // Landing tras cerrar sesión; formulario de acceso si fue "Agregar o cambiar cuenta".
+          showLanding = showsLandingAfter(event);
           window.scrollTo(0, 0);
         }
         resetSession();

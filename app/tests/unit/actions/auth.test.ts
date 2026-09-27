@@ -41,6 +41,8 @@ const {
   buildSignUpRedirectUrl,
   signInOrSignUp,
   signOut,
+  signInWithGoogle,
+  switchAccount,
   resolveSessionAfterLogin,
   completeOnboarding,
   setForcedPassword,
@@ -348,5 +350,26 @@ describe('signOut', () => {
     expect(supabaseMock.auth.signOut).toHaveBeenCalled();
     expect(get(currentUserId)).toBeNull();
     expect(get(currentBusinessId)).toBeNull();
+  });
+});
+
+describe('signInWithGoogle', () => {
+  it('pide a Google mostrar el selector de cuentas', async () => {
+    supabaseMock.auth.signInWithOAuth.mockResolvedValue({ error: null });
+    await signInWithGoogle('https://app.test/');
+    expect(supabaseMock.auth.signInWithOAuth).toHaveBeenCalledWith({
+      provider: 'google',
+      options: { redirectTo: 'https://app.test/', queryParams: { prompt: 'select_account' } },
+    });
+  });
+});
+
+describe('switchAccount', () => {
+  it('cierra la sesión marcando el cambio de cuenta (el cierre no lleva a la landing)', async () => {
+    sessionStorage.clear();
+    supabaseMock.auth.signOut.mockResolvedValue({ error: null });
+    await switchAccount();
+    expect(supabaseMock.auth.signOut).toHaveBeenCalled();
+    expect(sessionStorage.getItem('gestorSwitchAccount')).toBe('1');
   });
 });
