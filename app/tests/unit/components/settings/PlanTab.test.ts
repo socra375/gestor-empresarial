@@ -20,6 +20,11 @@ describe('PlanTab', () => {
     expect(link.rel).toContain('noopener');
   });
 
+  it('enlaza a la política de reembolsos junto a los planes', () => {
+    render(PlanTab);
+    expect(screen.getByRole('link', { name: 'Ver política de reembolsos' }).getAttribute('href')).toBe('#/reembolsos');
+  });
+
   it('sin violaciones de accesibilidad (axe-core)', async () => {
     const { container } = render(PlanTab);
     await expectNoA11yViolations(container);

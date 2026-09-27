@@ -3,6 +3,8 @@
   import { t } from '../../stores/locale';
   import { signInOrSignUp, signInWithGoogle, type PendingInvite } from '../../actions/auth';
   import { showLoader, hideLoader } from '../../stores/loader';
+  import { legalHref } from '../../utils/legal';
+  import LegalFooter from '../legal/LegalFooter.svelte';
 
   interface Props {
     pendingInvite: PendingInvite | null;
@@ -18,6 +20,7 @@
   let inviteCode = $state(untrack(() => pendingInvite?.code ?? ''));
   let employeeName = $state(untrack(() => pendingInvite?.employeeName ?? ''));
   let submitting = $state(false);
+  let acceptedTerms = $state(false);
   let statusMessage = $state<{ kind: 'error' | 'success'; text: string } | null>(null);
 
   const showEmployeeNameField = $derived(inviteCode.trim().length > 0);
@@ -25,6 +28,11 @@
   async function handleSubmit(event: SubmitEvent) {
     event.preventDefault();
     statusMessage = null;
+
+    if (!acceptedTerms) {
+      statusMessage = { kind: 'error', text: $t('auth.need_terms') };
+      return;
+    }
 
     const trimmedInvite = inviteCode.trim();
     if (trimmedInvite && !employeeName.trim()) {
@@ -56,6 +64,10 @@
   }
 
   async function handleGoogle() {
+    if (!acceptedTerms) {
+      statusMessage = { kind: 'error', text: $t('auth.need_terms') };
+      return;
+    }
     const { error } = await signInWithGoogle(window.location.origin + window.location.pathname);
     if (error) statusMessage = { kind: 'error', text: $t('auth.oauth_error', { msg: error.message }) };
   }
@@ -121,6 +133,16 @@
           </div>
         {/if}
 
+        <div class="terms">
+          <input id="auth-terms" type="checkbox" bind:checked={acceptedTerms} />
+          <label for="auth-terms">
+            {$t('auth.terms_prefix')}
+            <a href={legalHref('terminos')} target="_blank" rel="noopener noreferrer">{$t('auth.terms_link')}</a>
+            {$t('auth.terms_and')}
+            <a href={legalHref('privacidad')} target="_blank" rel="noopener noreferrer">{$t('auth.privacy_link')}</a>
+          </label>
+        </div>
+
         {#if statusMessage}
           <p class="auth-msg" role={statusMessage.kind === 'error' ? 'alert' : 'status'}>{statusMessage.text}</p>
         {/if}
@@ -130,6 +152,7 @@
       </form>
     </section>
   </main>
+  <div class="auth-legal"><LegalFooter variant="dark" /></div>
 </div>
 
 <style>
@@ -153,8 +176,12 @@
     inset: 0;
     overflow-y: auto;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
+    /* Centrado vertical con márgenes auto (tarjeta y pie) en vez de
+       justify-content: center, que recorta el borde superior cuando el
+       contenido no entra en pantallas bajas. */
+    justify-content: flex-start;
     padding: 32px 20px;
     background: linear-gradient(135deg, #2e0a1e 0%, #5b1a3b 55%, #8a2f55 100%);
     font-family: var(--font-inter);
@@ -162,6 +189,7 @@
   }
 
   .auth-card {
+    margin-top: auto;
     width: min(1040px, 100%);
     min-height: 580px;
     display: grid;
@@ -319,6 +347,39 @@
 
   .field input:focus-visible {
     box-shadow: 0 0 0 4px rgba(233, 143, 143, 0.25);
+  }
+
+  .terms {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 4px 4px 0;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    color: var(--tinta);
+  }
+
+  .terms input {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+    accent-color: var(--ciruela);
+  }
+
+  .terms label {
+    cursor: pointer;
+  }
+
+  .terms a {
+    color: var(--ciruela);
+    font-weight: 600;
+  }
+
+  .auth-legal {
+    width: min(1040px, 100%);
+    margin-top: 16px;
+    margin-bottom: auto;
   }
 
   .auth-msg {

@@ -54,6 +54,7 @@ describe('AuthScreen', () => {
 
     await fireEvent.input(screen.getByLabelText('Correo Electrónico'), { target: { value: 'ana@test.com' } });
     await fireEvent.input(screen.getByLabelText('Contraseña'), { target: { value: 'secret123' } });
+    await fireEvent.click(screen.getByRole('checkbox'));
     await fireEvent.click(screen.getByRole('button', { name: 'Iniciar Sesión / Registrarse' }));
 
     expect((await screen.findByRole('alert')).textContent).toBe(
@@ -68,6 +69,7 @@ describe('AuthScreen', () => {
 
     await fireEvent.input(screen.getByLabelText('Correo Electrónico'), { target: { value: 'ana@test.com' } });
     await fireEvent.input(screen.getByLabelText('Contraseña'), { target: { value: 'secret123' } });
+    await fireEvent.click(screen.getByRole('checkbox'));
     await fireEvent.click(screen.getByRole('button', { name: 'Iniciar Sesión / Registrarse' }));
 
     expect(authActionsMock.signInOrSignUp).toHaveBeenCalledWith(
@@ -87,6 +89,7 @@ describe('AuthScreen', () => {
 
     await fireEvent.input(screen.getByLabelText('Correo Electrónico'), { target: { value: 'ana@test.com' } });
     await fireEvent.input(screen.getByLabelText('Contraseña'), { target: { value: 'secret123' } });
+    await fireEvent.click(screen.getByRole('checkbox'));
     await fireEvent.click(screen.getByRole('button', { name: 'Iniciar Sesión / Registrarse' }));
 
     expect(get(loader)).toBe('login');
@@ -104,6 +107,7 @@ describe('AuthScreen', () => {
     // navegador bloquea el submit antes de que corra handleSubmit.
     await fireEvent.input(screen.getByLabelText('Correo Electrónico'), { target: { value: 'ana@test.com' } });
     await fireEvent.input(screen.getByLabelText('Contraseña'), { target: { value: 'secret123' } });
+    await fireEvent.click(screen.getByRole('checkbox'));
     await fireEvent.click(screen.getByRole('button', { name: 'Iniciar Sesión / Registrarse' }));
 
     expect((await screen.findByRole('status')).textContent).toContain('Revisa tu correo');
@@ -115,9 +119,37 @@ describe('AuthScreen', () => {
 
     await fireEvent.input(screen.getByLabelText('Correo Electrónico'), { target: { value: 'ana@test.com' } });
     await fireEvent.input(screen.getByLabelText('Contraseña'), { target: { value: 'secret123' } });
+    await fireEvent.click(screen.getByRole('checkbox'));
     await fireEvent.click(screen.getByRole('button', { name: 'Iniciar Sesión / Registrarse' }));
 
     expect((await screen.findByRole('alert')).textContent).toBe('Error de autenticación: credenciales inválidas');
+  });
+
+  it('sin aceptar Términos y Privacidad no envía el formulario y lo avisa', async () => {
+    render(AuthScreen, { props: { pendingInvite: null } });
+
+    await fireEvent.input(screen.getByLabelText('Correo Electrónico'), { target: { value: 'ana@test.com' } });
+    await fireEvent.input(screen.getByLabelText('Contraseña'), { target: { value: 'secret123' } });
+    await fireEvent.click(screen.getByRole('button', { name: 'Iniciar Sesión / Registrarse' }));
+
+    expect((await screen.findByRole('alert')).textContent).toBe(
+      'Debes aceptar los Términos y la Política de privacidad para continuar.'
+    );
+    expect(authActionsMock.signInOrSignUp).not.toHaveBeenCalled();
+  });
+
+  it('sin aceptar Términos, "Entrar con Google" tampoco avanza', async () => {
+    render(AuthScreen, { props: { pendingInvite: null } });
+    await fireEvent.click(screen.getByRole('button', { name: /Google/ }));
+
+    expect(await screen.findByRole('alert')).toBeTruthy();
+    expect(authActionsMock.signInWithGoogle).not.toHaveBeenCalled();
+  });
+
+  it('los links del consentimiento abren Términos y Privacidad', () => {
+    render(AuthScreen, { props: { pendingInvite: null } });
+    expect(screen.getByRole('link', { name: 'Términos y condiciones' }).getAttribute('href')).toBe('#/terminos');
+    expect(screen.getByRole('link', { name: 'Política de privacidad' }).getAttribute('href')).toBe('#/privacidad');
   });
 
   it('sin violaciones de accesibilidad (axe-core)', async () => {

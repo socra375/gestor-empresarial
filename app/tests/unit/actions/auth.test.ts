@@ -122,7 +122,10 @@ describe('signInOrSignUp', () => {
     expect(supabaseMock.auth.signUp).toHaveBeenCalledWith({
       email: 'nueva@b.com',
       password: 'secret1',
-      options: { emailRedirectTo: 'https://app.test/?invite=EMPABC123&empname=Ana' },
+      options: {
+        emailRedirectTo: 'https://app.test/?invite=EMPABC123&empname=Ana',
+        data: { terms_accepted_at: expect.any(String), terms_version: '2026-09-27' },
+      },
     });
   });
 
