@@ -4,8 +4,8 @@ import { TRANSLATIONS, LOCALES, DEFAULT_LOCALE, isLocale, t } from '../../../src
 describe('paridad de claves entre idiomas', () => {
   const referenceKeys = Object.keys(TRANSLATIONS[DEFAULT_LOCALE]).sort();
 
-  it('español tiene 424 claves (la referencia)', () => {
-    expect(referenceKeys).toHaveLength(424);
+  it('español tiene 430 claves (la referencia)', () => {
+    expect(referenceKeys).toHaveLength(430);
   });
 
   it.each(LOCALES.filter((l) => l !== DEFAULT_LOCALE))(

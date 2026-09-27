@@ -17,6 +17,14 @@
   import { apptStatusLabel, type AppointmentStatus } from '../../utils/labels';
   import type { PaymentMethodKey } from '../../utils/payments';
   import { buildInvoicePdf, openInvoicePdf, loadImageAsDataURL } from '../../pdf/invoicePdf';
+  import {
+    isRemindable,
+    markReminderSent,
+    normalizeWhatsappPhone,
+    reminderDateLabel,
+    sentReminderIds,
+    whatsappReminderHref,
+  } from '../../utils/reminders';
   import AppointmentForm from './AppointmentForm.svelte';
   import PaymentMethodModal from './PaymentMethodModal.svelte';
   import type { Tables } from '../../types/database.types';
@@ -68,6 +76,48 @@
   function goToToday() {
     selectedDate = toDateInputValue(new Date());
   }
+
+  // --- Recordatorios por WhatsApp (link wa.me con el mensaje ya escrito) ---
+  let remindedIds = $state(sentReminderIds());
+
+  function tomorrowDateValue(): string {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return toDateInputValue(d);
+  }
+
+  /** Link de WhatsApp para recordar la cita, o null si no corresponde (sin teléfono, pasada, cancelada...). */
+  function reminderHrefFor(appt: Tables<'appointments'>): string | null {
+    if (!isRemindable(appt)) return null;
+    const customer = $customersStore.find((c) => c.id === appt.customer_id);
+    const phone = normalizeWhatsappPhone(customer?.phone);
+    if (!customer || !phone) return null;
+    const business = $currentBusiness;
+    const message = $t('appt.reminder_message', {
+      name: customer.name,
+      business: business?.name ?? '',
+      date: reminderDateLabel(appt.start_at, $locale),
+      time: fmtTime(appt.start_at, $locale),
+      services: apptServicesLabel(appt, $servicesStore),
+      specialist: specialistLabelFor(appt.employee_id),
+      address: business?.address ? $t('appt.reminder_address', { address: business.address }) : '',
+    });
+    return whatsappReminderHref(phone, message);
+  }
+
+  function handleReminderSent(apptId: string) {
+    markReminderSent(apptId);
+    remindedIds = sentReminderIds();
+  }
+
+  const tomorrowPendingReminders = $derived(
+    $appointmentsStore.filter(
+      (a) =>
+        toDateInputValue(new Date(a.start_at)) === tomorrowDateValue() &&
+        !remindedIds.has(a.id) &&
+        reminderHrefFor(a) !== null
+    ).length
+  );
 
   function clientNameFor(appt: Tables<'appointments'>): string {
     return getAppointmentClientName(appt, $customersStore, $t('appt.walkin_fallback'));
@@ -187,6 +237,13 @@
     <p role="alert">{errorMessage}</p>
   {/if}
 
+  {#if tomorrowPendingReminders > 0 && selectedDate !== tomorrowDateValue()}
+    <div class="reminder-banner" role="status">
+      <span>{$t('appt.reminder_banner', { count: tomorrowPendingReminders })}</span>
+      <button type="button" onclick={() => (selectedDate = tomorrowDateValue())}>{$t('appt.reminder_banner_btn')}</button>
+    </div>
+  {/if}
+
   <div class="agenda-list-card">
     <h2 class="agenda-list-title">{isToday ? $t('appt.list_title_today') : $t('appt.list_title_date', { date: fmtDate(`${selectedDate}T00:00:00`, $locale) })}</h2>
 
@@ -216,6 +273,19 @@
                       <span class="badge-status status-{appt.status}">{apptStatusLabel(appt.status as AppointmentStatus, $locale)}</span>
                     </div>
                     <p class="appt-card-details">{apptServicesLabel(appt, $servicesStore)} · {specialistLabelFor(appt.employee_id)}</p>
+                    {#if reminderHrefFor(appt)}
+                      {@const reminded = remindedIds.has(appt.id)}
+                      <a
+                        class="btn-reminder"
+                        class:reminded
+                        href={reminderHrefFor(appt)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onclick={() => handleReminderSent(appt.id)}
+                      >
+                        {reminded ? $t('appt.reminder_sent') : $t('appt.reminder_btn')}
+                      </a>
+                    {/if}
                   </div>
                   <div class="appt-card-actions">
                     {#if pendingChange?.apptId === appt.id}
@@ -445,6 +515,59 @@
     background: var(--at-input-bg);
     border: 1px solid var(--at-teal-1);
     color: #7fd6e0;
+  }
+
+  .btn-reminder {
+    display: inline-block;
+    margin-top: 0.45rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: #0b2e1a;
+    background: #5bd28a;
+    border: 1px solid #5bd28a;
+  }
+
+  .btn-reminder:hover,
+  .btn-reminder:focus-visible {
+    background: #7ee0a4;
+  }
+
+  .btn-reminder:focus-visible {
+    outline: 2px solid var(--at-glow);
+    outline-offset: 2px;
+  }
+
+  .btn-reminder.reminded {
+    color: #9ee6b9;
+    background: transparent;
+    border-color: #2f6b46;
+  }
+
+  .reminder-banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+    padding: 0.8rem 1rem;
+    border-radius: 12px;
+    border: 1px solid #2f6b46;
+    background: #10261a;
+    color: #c9f2d9;
+    font-size: 0.9rem;
+  }
+
+  .reminder-banner button {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 999px;
+    border: 1px solid #5bd28a;
+    background: transparent;
+    color: #9ee6b9;
   }
 
   @media (max-width: 640px) {
