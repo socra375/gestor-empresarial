@@ -193,6 +193,7 @@
             <tr><td><code>gestorTrialPlan</code></td><td>Recordar el plan que elegiste para probar en la página principal.</td><td>Hasta terminar el registro</td></tr>
             <tr><td><code>gestorLandingSeen</code></td><td>No volver a mostrarte la página de presentación.</td><td>Hasta que lo borres</td></tr>
             <tr><td><code>sessionBannerLastShown</code></td><td>Mostrar el aviso de bienvenida una sola vez al día.</td><td>Hasta que lo borres</td></tr>
+            <tr><td><code>gestorTermsAccepted</code></td><td>Recordar que ya aceptaste los Términos y la Política de privacidad (y en qué versión).</td><td>Hasta que lo borres</td></tr>
             <tr><td><code>gestorStorageNoticeSeen</code></td><td>Recordar que ya viste este aviso.</td><td>Hasta que lo borres</td></tr>
             <tr><td><code>ge_last_active</code></td><td>Saber si la pestaña estuvo inactiva para actualizar tus datos.</td><td>Hasta cerrar la pestaña</td></tr>
           </tbody>

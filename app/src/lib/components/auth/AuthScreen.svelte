@@ -3,7 +3,7 @@
   import { t } from '../../stores/locale';
   import { signInOrSignUp, signInWithGoogle, type PendingInvite } from '../../actions/auth';
   import { showLoader, hideLoader } from '../../stores/loader';
-  import { legalHref } from '../../utils/legal';
+  import { legalHref, hasAcceptedTerms, rememberTermsAccepted } from '../../utils/legal';
   import LegalFooter from '../legal/LegalFooter.svelte';
 
   interface Props {
@@ -20,7 +20,10 @@
   let inviteCode = $state(untrack(() => pendingInvite?.code ?? ''));
   let employeeName = $state(untrack(() => pendingInvite?.employeeName ?? ''));
   let submitting = $state(false);
-  let acceptedTerms = $state(false);
+  // Quien ya aceptó la versión vigente en este navegador no vuelve a ver la
+  // casilla (si los documentos cambian de versión, se vuelve a pedir).
+  const termsAlreadyAccepted = hasAcceptedTerms();
+  let acceptedTerms = $state(termsAlreadyAccepted);
   let statusMessage = $state<{ kind: 'error' | 'success'; text: string } | null>(null);
 
   const showEmployeeNameField = $derived(inviteCode.trim().length > 0);
@@ -33,6 +36,7 @@
       statusMessage = { kind: 'error', text: $t('auth.need_terms') };
       return;
     }
+    rememberTermsAccepted();
 
     const trimmedInvite = inviteCode.trim();
     if (trimmedInvite && !employeeName.trim()) {
@@ -68,6 +72,7 @@
       statusMessage = { kind: 'error', text: $t('auth.need_terms') };
       return;
     }
+    rememberTermsAccepted();
     const { error } = await signInWithGoogle(window.location.origin + window.location.pathname);
     if (error) statusMessage = { kind: 'error', text: $t('auth.oauth_error', { msg: error.message }) };
   }
@@ -133,15 +138,17 @@
           </div>
         {/if}
 
-        <div class="terms">
-          <input id="auth-terms" type="checkbox" bind:checked={acceptedTerms} />
-          <label for="auth-terms">
-            {$t('auth.terms_prefix')}
-            <a href={legalHref('terminos')} target="_blank" rel="noopener noreferrer">{$t('auth.terms_link')}</a>
-            {$t('auth.terms_and')}
-            <a href={legalHref('privacidad')} target="_blank" rel="noopener noreferrer">{$t('auth.privacy_link')}</a>
-          </label>
-        </div>
+        {#if !termsAlreadyAccepted}
+          <div class="terms">
+            <input id="auth-terms" type="checkbox" bind:checked={acceptedTerms} />
+            <label for="auth-terms">
+              {$t('auth.terms_prefix')}
+              <a href={legalHref('terminos')} target="_blank" rel="noopener noreferrer">{$t('auth.terms_link')}</a>
+              {$t('auth.terms_and')}
+              <a href={legalHref('privacidad')} target="_blank" rel="noopener noreferrer">{$t('auth.privacy_link')}</a>
+            </label>
+          </div>
+        {/if}
 
         {#if statusMessage}
           <p class="auth-msg" role={statusMessage.kind === 'error' ? 'alert' : 'status'}>{statusMessage.text}</p>
@@ -190,6 +197,10 @@
 
   .auth-card {
     margin-top: auto;
+    /* Sin esto, en la columna flex de .auth-page la tarjeta se encoge para
+       caber en la pantalla y su overflow: hidden corta el formulario (el
+       botón de Google quedaba oculto). La página hace scroll en su lugar. */
+    flex-shrink: 0;
     width: min(1040px, 100%);
     min-height: 580px;
     display: grid;
@@ -377,6 +388,7 @@
   }
 
   .auth-legal {
+    flex-shrink: 0;
     width: min(1040px, 100%);
     margin-top: 16px;
     margin-bottom: auto;
