@@ -126,6 +126,23 @@ describe('AuthScreen', () => {
     expect((await screen.findByRole('alert')).textContent).toBe('Error de autenticación: credenciales inválidas');
   });
 
+  it.each([
+    ['account_exists', 'Ya tienes una cuenta con este correo'],
+    ['email_not_confirmed', 'todavía no está confirmada'],
+  ] as const)('si el correo ya está registrado (%s) no muestra "revisa tu correo"', async (status, text) => {
+    authActionsMock.signInOrSignUp.mockResolvedValue({ status });
+    render(AuthScreen, { props: { pendingInvite: null } });
+
+    await fireEvent.input(screen.getByLabelText('Correo Electrónico'), { target: { value: 'ana@test.com' } });
+    await fireEvent.input(screen.getByLabelText('Contraseña'), { target: { value: 'secret123' } });
+    await fireEvent.click(screen.getByRole('checkbox'));
+    await fireEvent.click(screen.getByRole('button', { name: 'Iniciar Sesión / Registrarse' }));
+
+    const alert = await screen.findByRole('alert');
+    expect(alert.textContent).toContain(text);
+    expect(alert.textContent).not.toContain('Revisa tu correo');
+  });
+
   it('sin aceptar Términos y Privacidad no envía el formulario y lo avisa', async () => {
     render(AuthScreen, { props: { pendingInvite: null } });
 

@@ -47,6 +47,10 @@ export function buildSignUpRedirectUrl(
 export type SignInOrSignUpResult =
   | { status: 'signed_in' }
   | { status: 'signup_email_sent' }
+  /** El correo ya tiene cuenta y la contraseña no coincide (o se creó con Google y no tiene contraseña). */
+  | { status: 'account_exists' }
+  /** La cuenta existe pero todavía no abrió el enlace de confirmación. */
+  | { status: 'email_not_confirmed' }
   | { status: 'error'; error: AuthError };
 
 /**
@@ -54,6 +58,11 @@ export type SignInOrSignUpResult =
  * iniciar sesión primero, y solo si falla intenta registrar una cuenta
  * nueva (con el código de invitación, si hay uno, viajando en la URL de
  * confirmación del correo).
+ *
+ * Si el correo ya está registrado no se trata como registro nuevo: Supabase
+ * responde al signUp con un usuario sin identidades (o con
+ * user_already_exists si la confirmación por correo está apagada), y ahí se
+ * avisa que la cuenta existe en vez de "revisa tu correo".
  */
 export async function signInOrSignUp(params: {
   email: string;
@@ -66,9 +75,10 @@ export async function signInOrSignUp(params: {
     password: params.password,
   });
   if (!signInError) return { status: 'signed_in' };
+  if (signInError.code === 'email_not_confirmed') return { status: 'email_not_confirmed' };
 
   const redirectUrl = buildSignUpRedirectUrl(params.redirectBaseUrl, params.invite, getPendingTrial());
-  const { error: signUpError } = await supabase.auth.signUp({
+  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
     email: params.email,
     password: params.password,
     options: {
@@ -78,7 +88,9 @@ export async function signInOrSignUp(params: {
       data: { terms_accepted_at: new Date().toISOString(), terms_version: LEGAL_VERSION },
     },
   });
+  if (signUpError?.code === 'user_already_exists') return { status: 'account_exists' };
   if (signUpError) return { status: 'error', error: signUpError };
+  if (signUpData?.user && signUpData.user.identities?.length === 0) return { status: 'account_exists' };
   return { status: 'signup_email_sent' };
 }
 

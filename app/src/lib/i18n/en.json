@@ -17,6 +17,8 @@
   "auth.error": "Authentication error: {{msg}}",
   "auth.signup_success": "Sign up successful. Check your email (on any device) to confirm your account.",
   "auth.invite_invalid": "The invitation code is invalid or already used: {{msg}}",
+  "auth.account_exists": "You already have an account with this email, but the password doesn't match. If you signed up with Google, use “Sign in with Google” (in My Account you can create a password to sign in with your email).",
+  "auth.email_not_confirmed": "Your account exists but hasn't been confirmed yet. Open the link we sent you when you signed up and try again.",
   "onboarding.title": "Set up your business",
   "onboarding.subtitle": "Three details and you're ready. You can change them later in Settings.",
   "onboarding.business_name_label": "Your business name",

@@ -17,6 +17,8 @@
   "auth.error": "Erro de autenticação: {{msg}}",
   "auth.signup_success": "Cadastro realizado com sucesso. Verifique seu e-mail (em qualquer dispositivo) para confirmar a conta.",
   "auth.invite_invalid": "O código de convite é inválido ou já foi usado: {{msg}}",
+  "auth.account_exists": "Você já tem uma conta com este e-mail, mas a senha não confere. Se você se cadastrou com o Google, use “Entrar com Google” (em Minha Conta você pode criar uma senha para entrar com seu e-mail).",
+  "auth.email_not_confirmed": "Sua conta já existe, mas ainda não foi confirmada. Abra o link que enviamos quando você se cadastrou e tente novamente.",
   "onboarding.title": "Configure seu negócio",
   "onboarding.subtitle": "Três dados e você já começa. Poderá alterá-los depois em Configurações.",
   "onboarding.business_name_label": "Nome do seu negócio",
