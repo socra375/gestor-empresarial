@@ -12,21 +12,50 @@ export interface Db {
   rpc(fn: string, args?: Record<string, unknown>): PromiseLike<{ data: unknown; error: { message: string } | null }>;
 }
 
+/** Operaciones fuera de la BD que necesita /confirmar (Storage y Auth). */
+export interface AdminOps {
+  deleteLogos(businessId: string): Promise<void>;
+  deleteUser(userId: string): Promise<void>;
+}
+
 export const PLANS = ['mensual', 'semestral', 'anual'] as const;
+export const MODULES = ['facturas', 'equipo', 'estadisticas'] as const;
+
+interface Stats {
+  clientes: number;
+  citas: number;
+  facturas: number;
+  servicios: number;
+  empleados: number;
+  ultima_actividad: string | null;
+}
+
+interface ModuleRow {
+  module: string;
+  enabled: boolean;
+  origen: string;
+}
 
 export const HELP = [
   'Comandos:',
   '/vincular <código> — vincula este chat (el código se genera en la app: Configuración → Plan)',
   '/negocios — todos los negocios',
   '/estado <email>',
-  '/plan <email> mensual|semestral|anual',
+  '/plan <email> mensual|semestral|anual — asigna o renueva (suma tiempo al mismo plan)',
+  '/cambiar <email> mensual|semestral|anual — cambia el plan ya, conservando la fecha de vencimiento',
+  '/prueba <email> mensual|semestral|anual — prueba total del plan (10/20/30 días desde el registro; los días usados se restan)',
   '/bloquear <email> [motivo]',
   '/desbloquear <email>',
   '/pausar <email> [motivo] — congela los días restantes',
   '/reanudar <email>',
   '/vencen — vencen en los próximos 7 días',
+  '/modulos <email> — qué módulos tiene (facturas, equipo, estadisticas)',
+  '/activar <email> <módulo>',
+  '/desactivar <email> <módulo>',
+  '/eliminar <email> — borra la cuenta y TODOS sus datos (solo bloqueadas o vencidas; pide confirmación)',
+  '/confirmar <código> — confirma una eliminación',
   '',
-  'Bloquear o pausar solo corta el acceso: los datos del negocio quedan guardados.',
+  'Bloquear, pausar o desactivar un módulo solo corta el acceso: los datos quedan guardados. Solo /eliminar borra.',
 ].join('\n');
 
 export function parseCommand(text: string): { cmd: string; args: string[] } | null {
@@ -75,6 +104,22 @@ async function findByEmail(db: Db, email: string | undefined): Promise<BusinessR
   return found ?? `No hay ningún negocio con el email ${email}.`;
 }
 
+async function statsOf(db: Db, id: string): Promise<string> {
+  const rows = (await call(db, 'admin_business_stats', { p_business_id: id })) as Stats[] | null;
+  const st = rows?.[0];
+  if (!st) return '';
+  return [
+    `Clientes: ${st.clientes} · Citas: ${st.citas} · Facturas: ${st.facturas}`,
+    `Servicios: ${st.servicios} · Empleados: ${st.empleados} · Última actividad: ${fmtDay(st.ultima_actividad)}`,
+  ].join('\n');
+}
+
+export function formatModules(rows: ModuleRow[]): string {
+  return rows
+    .map((m) => `${m.enabled ? '✅' : '❌'} ${m.module}${m.origen === 'plan' ? '' : ` (${m.origen})`}`)
+    .join('\n');
+}
+
 async function statusOf(db: Db, id: string): Promise<string> {
   const b = (await listBusinesses(db)).find((r) => r.business_id === id);
   return b ? formatBusiness(b) : '';
@@ -86,7 +131,13 @@ async function statusOf(db: Db, id: string): Promise<string> {
  * solo un chat vinculado a un súper admin. Para chats ajenos devuelve
  * null: el webhook no responde nada.
  */
-export async function handleUpdate(db: Db, chatId: number, text: string, now: Date = new Date()): Promise<string | null> {
+export async function handleUpdate(
+  db: Db,
+  chatId: number,
+  text: string,
+  ops: AdminOps,
+  now: Date = new Date(),
+): Promise<string | null> {
   const parsed = parseCommand(text);
   if (parsed?.cmd === 'vincular') {
     if (!parsed.args[0]) return 'Uso: /vincular <código>';
@@ -97,10 +148,15 @@ export async function handleUpdate(db: Db, chatId: number, text: string, now: Da
 
   const { data: isAdmin, error } = await db.rpc('admin_chat_is_super_admin', { p_chat_id: chatId });
   if (error || isAdmin !== true) return null;
-  return handleCommand(db, text, now);
+  return handleCommand(db, text, now, { chatId, ops });
 }
 
-export async function handleCommand(db: Db, text: string, now: Date = new Date()): Promise<string> {
+export async function handleCommand(
+  db: Db,
+  text: string,
+  now: Date = new Date(),
+  ctx?: { chatId: number; ops: AdminOps },
+): Promise<string> {
   const parsed = parseCommand(text);
   if (!parsed) return HELP;
   const { cmd, args } = parsed;
@@ -124,7 +180,92 @@ export async function handleCommand(db: Db, text: string, now: Date = new Date()
 
       case 'estado': {
         const b = await findByEmail(db, args[0]);
-        return typeof b === 'string' ? b : formatBusiness(b);
+        if (typeof b === 'string') return b;
+        return `${formatBusiness(b)}\n${await statsOf(db, b.business_id)}`;
+      }
+
+      case 'modulos': {
+        const b = await findByEmail(db, args[0]);
+        if (typeof b === 'string') return b;
+        const rows = (await call(db, 'admin_list_modules', { p_business_id: b.business_id })) as ModuleRow[];
+        return `${b.name}\n${formatModules(rows)}`;
+      }
+
+      case 'activar':
+      case 'desactivar': {
+        const mod = (args[1] ?? '').toLowerCase();
+        if (!(MODULES as readonly string[]).includes(mod)) {
+          return `Uso: /${cmd} <email> ${MODULES.join('|')}`;
+        }
+        const b = await findByEmail(db, args[0]);
+        if (typeof b === 'string') return b;
+        await call(db, 'admin_set_module', {
+          p_business_id: b.business_id,
+          p_module: mod,
+          p_enabled: cmd === 'activar',
+        });
+        const rows = (await call(db, 'admin_list_modules', { p_business_id: b.business_id })) as ModuleRow[];
+        return `Listo. Los datos no se borran: solo se ocultan mientras el módulo esté apagado.\n${b.name}\n${formatModules(rows)}`;
+      }
+
+      case 'eliminar': {
+        if (!ctx) return 'Error: falta el contexto del chat.';
+        const b = await findByEmail(db, args[0]);
+        if (typeof b === 'string') return b;
+        const code = (await call(db, 'admin_prepare_delete', { p_business_id: b.business_id, p_chat_id: ctx.chatId })) as string;
+        return [
+          '⚠️ ELIMINACIÓN PERMANENTE — no se puede deshacer.',
+          formatBusiness(b),
+          await statsOf(db, b.business_id),
+          '',
+          'Se borrarán el negocio, todos sus datos, sus logos y los usuarios del dueño y sus empleados.',
+          `Para confirmar envía en los próximos 5 minutos: /confirmar ${code}`,
+        ].join('\n');
+      }
+
+      case 'confirmar': {
+        if (!ctx) return 'Error: falta el contexto del chat.';
+        if (!args[0]) return 'Uso: /confirmar <código>';
+        const rows = (await call(db, 'admin_execute_delete', { p_code: args[0], p_chat_id: ctx.chatId })) as {
+          business_id: string;
+          name: string;
+          user_ids: string[];
+        }[];
+        const del = rows[0];
+        const problems: string[] = [];
+        try {
+          await ctx.ops.deleteLogos(del.business_id);
+        } catch (err) {
+          problems.push(`logos: ${err instanceof Error ? err.message : String(err)}`);
+        }
+        for (const id of del.user_ids ?? []) {
+          try {
+            await ctx.ops.deleteUser(id);
+          } catch (err) {
+            problems.push(`usuario ${id}: ${err instanceof Error ? err.message : String(err)}`);
+          }
+        }
+        const users = del.user_ids?.length ?? 0;
+        const base = `🗑️ "${del.name}" eliminado con todos sus datos. Usuarios borrados: ${users - problems.filter((p) => p.startsWith('usuario')).length}/${users}.`;
+        return problems.length ? `${base}\nPendiente de borrar a mano en Supabase:\n${problems.join('\n')}` : base;
+      }
+
+      case 'prueba': {
+        const plan = (args[1] ?? '').toLowerCase();
+        if (!(PLANS as readonly string[]).includes(plan)) return 'Uso: /prueba <email> mensual|semestral|anual';
+        const b = await findByEmail(db, args[0]);
+        if (typeof b === 'string') return b;
+        await call(db, 'admin_set_trial', { p_business_id: b.business_id, p_plan: plan });
+        return `Prueba aplicada.\n${await statusOf(db, b.business_id)}`;
+      }
+
+      case 'cambiar': {
+        const plan = (args[1] ?? '').toLowerCase();
+        if (!(PLANS as readonly string[]).includes(plan)) return 'Uso: /cambiar <email> mensual|semestral|anual';
+        const b = await findByEmail(db, args[0]);
+        if (typeof b === 'string') return b;
+        await call(db, 'admin_change_plan', { p_business_id: b.business_id, p_plan: plan });
+        return `Plan cambiado (se conserva la fecha de vencimiento).\n${await statusOf(db, b.business_id)}`;
       }
 
       case 'plan': {

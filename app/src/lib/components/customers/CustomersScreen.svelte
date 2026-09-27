@@ -41,9 +41,12 @@
     specialistOptions = options;
   }
 
+  let saveError = $state('');
+
   async function handleSubmit(event: SubmitEvent) {
     event.preventDefault();
     if (!businessId) return;
+    saveError = '';
     submitting = true;
     try {
       await registerCustomer({
@@ -57,6 +60,11 @@
       phone = '';
       address = '';
       email = '';
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      // El trigger enforce_customer_limit responde 'CUSTOMER_LIMIT:<n>'.
+      const limit = /CUSTOMER_LIMIT:(\d+)/.exec(msg)?.[1];
+      saveError = limit ? $t('cust.limit_reached', { limit }) : $t('cust.save_error', { msg });
     } finally {
       submitting = false;
     }
@@ -66,6 +74,9 @@
 <section aria-labelledby="customers-title">
   <h1 id="customers-title">{$t('cfg.tab_customers')}</h1>
 
+  {#if saveError}
+    <p role="alert">{saveError}</p>
+  {/if}
   <form class="card" onsubmit={handleSubmit}>
     <h2>{$t('cust.form_title')}</h2>
 

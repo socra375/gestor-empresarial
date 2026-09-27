@@ -504,7 +504,13 @@ export interface Database {
           expires_at: string | null;
           reason: string | null;
           is_super_admin: boolean;
+          modules: string[];
+          trial_plan: string | null;
         }[];
+      };
+      choose_trial_plan: {
+        Args: { p_plan: string };
+        Returns: string;
       };
       create_telegram_link_code: {
         Args: Record<string, never>;

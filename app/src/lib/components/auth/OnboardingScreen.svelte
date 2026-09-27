@@ -2,6 +2,7 @@
   import { t } from '../../stores/locale';
   import { currentBusinessId } from '../../stores/session';
   import { completeOnboarding, type OnboardingResult } from '../../actions/auth';
+  import { finishSignup } from '../../actions/plans';
 
   interface Props {
     onCompleted: (result: OnboardingResult) => void;
@@ -62,6 +63,7 @@
         teamSize: null,
         currencySymbol: currency?.symbol ?? '$',
       });
+      await finishSignup();
       onCompleted(result);
     } finally {
       submitting = false;

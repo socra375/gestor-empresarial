@@ -2,7 +2,7 @@
   import { onMount, untrack } from 'svelte';
   import { get } from 'svelte/store';
   import { t, locale } from '../../stores/locale';
-  import { currentBusinessId, currentBusiness } from '../../stores/session';
+  import { currentBusinessId, currentBusiness, enabledModules } from '../../stores/session';
   import { appointments as appointmentsStore } from '../../stores/appointments';
   import { services as servicesStore } from '../../stores/services';
   import { customers as customersStore } from '../../stores/customers';
@@ -89,6 +89,11 @@
   }
 
   function startCompleting(appt: Tables<'appointments'>) {
+    // Sin el módulo de facturas, completar es solo un cambio de estado.
+    if (!$enabledModules.has('facturas')) {
+      requestStatusChange(appt.id, 'completada', $t('appt.btn_complete'));
+      return;
+    }
     payingMode = 'complete';
     payingAppt = appt;
   }
@@ -234,7 +239,7 @@
                       <button type="button" onclick={() => requestStatusChange(appt.id, 'cancelada', $t('appt.btn_cancel'))}>
                         {$t('appt.btn_cancel')}
                       </button>
-                    {:else if appt.status === 'completada' && !invoicedAppointmentIds.has(appt.id)}
+                    {:else if appt.status === 'completada' && $enabledModules.has('facturas') && !invoicedAppointmentIds.has(appt.id)}
                       <button type="button" onclick={() => startRetryInvoice(appt)}>{$t('appt.btn_invoice')}</button>
                     {/if}
                   </div>

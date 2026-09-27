@@ -2,10 +2,11 @@
   import { t, locale } from '../../stores/locale';
   import { businessAccess } from '../../stores/session';
   import { createTelegramLinkCode } from '../../api/businessAccess';
+  import { startPlanTrial } from '../../actions/plans';
   import { fmtDate, fmtTime } from '../../utils/format';
   import { teamWhatsappHref } from '../../utils/whatsapp';
   import { legalHref } from '../../utils/legal';
-  import type { BusinessPlan } from '../../types/businessAccess';
+  import type { PaidPlan } from '../../types/businessAccess';
   import type { TranslationKey } from '../../i18n';
 
   // El cliente y el equipo acuerdan el cambio de plan por WhatsApp; no hay
@@ -31,7 +32,6 @@
 
   // Los mismos 3 planes pagos de la landing (#planes) -- "prueba" es un
   // estado, no un plan que se pueda elegir, así que no tiene tarjeta acá.
-  type PaidPlan = Extract<BusinessPlan, 'mensual' | 'semestral' | 'anual'>;
   const PLAN_KEYS: PaidPlan[] = ['mensual', 'semestral', 'anual'];
 
   const currentPlan = $derived(
@@ -62,6 +62,24 @@
     anual: 'cfg.plan_equiv_anual',
   };
 
+  // Mientras sigue en la prueba genérica puede pasar a la de Mensual (el único
+  // plan con prueba gratis), una sola vez.
+  const canChooseTrial = $derived(access?.status === 'trial' && access.plan === 'prueba' && !access.trial_plan);
+  let trialError = $state('');
+  let startingTrial = $state(false);
+
+  async function tryPlan(plan: PaidPlan) {
+    trialError = '';
+    startingTrial = true;
+    try {
+      await startPlanTrial(plan);
+    } catch (err) {
+      trialError = $t('cfg.plan_try_error', { msg: err instanceof Error ? err.message : String(err) });
+    } finally {
+      startingTrial = false;
+    }
+  }
+
   function features(key: PaidPlan): string[] {
     return $t(PLAN_FEATURES_KEY[key])
       .split('|')
@@ -76,7 +94,13 @@
     <p><strong>{$t('cfg.plan_super_admin')}</strong></p>
   {:else if access?.plan}
     <p>
-      <strong>{$t('cfg.plan_current', { plan: $t(`plan.${access.plan}`) })}</strong>
+      <strong>
+        {#if access.plan === 'prueba' && access.trial_plan}
+          {$t('cfg.plan_trial_of', { plan: $t(`plan.${access.trial_plan}`) })}
+        {:else}
+          {$t('cfg.plan_current', { plan: $t(`plan.${access.plan}`) })}
+        {/if}
+      </strong>
       {#if access.expires_at}
         — {$t('cfg.plan_expires', { date: fmtDate(access.expires_at, $locale) })}
       {/if}
@@ -122,9 +146,20 @@
               <li>{feature}</li>
             {/each}
           </ul>
+          {#if canChooseTrial && key === 'mensual'}
+            <button type="button" class="plan-try" onclick={() => tryPlan(key)} disabled={startingTrial}>
+              {$t('cfg.plan_try_button')}
+            </button>
+          {/if}
         </div>
       {/each}
     </div>
+    {#if canChooseTrial}
+      <p class="plan-note">{$t('cfg.plan_try_hint')}</p>
+    {/if}
+    {#if trialError}
+      <p role="alert">{trialError}</p>
+    {/if}
     <p class="plan-note">
       {$t('cfg.plan_compare_note')}
       <a href={legalHref('reembolsos')}>{$t('cfg.plan_refunds_link')}</a>
@@ -212,6 +247,10 @@
   .plan-features li::before {
     content: '✓ ';
     color: var(--accent-profit);
+  }
+
+  .plan-try {
+    margin-top: auto;
   }
 
   .plan-note {

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { t, locale } from '../../stores/locale';
-  import { currentBusiness } from '../../stores/session';
+  import { currentBusiness, enabledModules } from '../../stores/session';
   import { payCredit } from '../../actions/customers';
   import { createInvoiceForAppointment } from '../../actions/invoices';
   import { summarizeCustomerHistory, pendingCreditTotal, monthlySpendingSummary } from '../../utils/customerAccount';
@@ -187,7 +187,9 @@
                 {#each month.pendingInvoice as appt (appt.id)}
                   <li>
                     {$t('cust.monthly_pending_label')} {fmtDate(appt.start_at, $locale)} · {apptServicesLabel(appt, services)}
-                    <button type="button" onclick={() => (invoicingAppt = appt)}>{$t('appt.btn_invoice')}</button>
+                    {#if $enabledModules.has('facturas')}
+                      <button type="button" onclick={() => (invoicingAppt = appt)}>{$t('appt.btn_invoice')}</button>
+                    {/if}
                   </li>
                 {/each}
               </ul>

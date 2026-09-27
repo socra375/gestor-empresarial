@@ -3,13 +3,29 @@
 // manda JWT: la autenticación es el secret_token del webhook + un chat_id
 // vinculado en la tabla super_admins (ver migración 004).
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { handleUpdate } from './commands.ts';
+import { type AdminOps, handleUpdate } from './commands.ts';
 
 const WEBHOOK_SECRET = Deno.env.get('TELEGRAM_WEBHOOK_SECRET') ?? '';
 
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
   auth: { persistSession: false },
 });
+
+const ops: AdminOps = {
+  async deleteLogos(businessId) {
+    const bucket = db.storage.from('business-logos');
+    const { data, error } = await bucket.list(businessId, { limit: 1000 });
+    if (error) throw new Error(error.message);
+    const paths = (data ?? []).map((f) => `${businessId}/${f.name}`);
+    if (paths.length === 0) return;
+    const { error: rmError } = await bucket.remove(paths);
+    if (rmError) throw new Error(rmError.message);
+  },
+  async deleteUser(userId) {
+    const { error } = await db.auth.admin.deleteUser(userId);
+    if (error) throw new Error(error.message);
+  },
+};
 
 function safeEqual(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
@@ -40,7 +56,7 @@ Deno.serve(async (req) => {
   // reintenta y un extraño no aprende nada del bot.
   if (chatId === undefined || !text) return new Response(null, { status: 200 });
 
-  const reply = await handleUpdate(db, chatId, text);
+  const reply = await handleUpdate(db, chatId, text, ops);
   if (reply === null) return new Response(null, { status: 200 });
   // Respuesta directa en el cuerpo del webhook: no hace falta el token del bot.
   return new Response(JSON.stringify({ method: 'sendMessage', chat_id: chatId, text: reply }), {

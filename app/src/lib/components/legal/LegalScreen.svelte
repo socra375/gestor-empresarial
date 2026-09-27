@@ -57,9 +57,11 @@
 
       <h2>4. Planes, prueba gratis y pagos</h2>
       <p>
-        Los planes, precios y límites vigentes se publican en la página principal. Los planes incluyen un período de
-        prueba gratis antes de pagar. El pago y los cambios de plan se coordinan directamente con nuestro equipo; no se
-        realizan cobros automáticos desde la app. Las devoluciones se rigen por la
+        Los planes, precios y límites vigentes (incluido el número máximo de clientes de cada plan) se publican en la
+        página principal. Al registrarte tienes un período de prueba gratis: 7 días, o 10 días si eliges la prueba del
+        plan Mensual (los días ya usados se descuentan). Los planes de 6 Meses y Anual se contratan directamente, sin
+        prueba. El pago y los cambios de plan se coordinan directamente con nuestro equipo; no se realizan cobros
+        automáticos desde la app. Las devoluciones se rigen por la
         <a href={legalHref('reembolsos')}>Política de reembolsos</a>. Si un plan vence o no se paga, el acceso puede
         quedar suspendido hasta regularizarlo; tus datos no se borran por ese motivo.
       </p>
@@ -137,6 +139,10 @@
         <li><strong>GitHub Pages</strong>: aloja la página web.</li>
         <li><strong>Google</strong>: solo si eliges "Entrar con Google" (recibe tu solicitud de inicio de sesión).</li>
         <li><strong>WhatsApp</strong>: solo si tocas un botón de WhatsApp para escribirnos.</li>
+        <li>
+          <strong>Telegram</strong>: nuestro equipo recibe ahí un aviso cuando se registra un negocio nuevo (nombre del
+          negocio, correo, tipo y período de prueba) y administra los planes desde un bot privado.
+        </li>
       </ul>
       <p>También podremos revelar datos si una autoridad competente lo exige conforme a la ley.</p>
 
@@ -181,6 +187,7 @@
           <tbody>
             <tr><td><code>sb-…-auth-token</code></td><td>Mantener tu sesión iniciada de forma segura.</td><td>Hasta que cierres sesión</td></tr>
             <tr><td><code>gs_lang</code></td><td>Recordar el idioma que elegiste.</td><td>Hasta que lo borres</td></tr>
+            <tr><td><code>gestorTrialPlan</code></td><td>Recordar el plan que elegiste para probar en la página principal.</td><td>Hasta terminar el registro</td></tr>
             <tr><td><code>gestorLandingSeen</code></td><td>No volver a mostrarte la página de presentación.</td><td>Hasta que lo borres</td></tr>
             <tr><td><code>sessionBannerLastShown</code></td><td>Mostrar el aviso de bienvenida una sola vez al día.</td><td>Hasta que lo borres</td></tr>
             <tr><td><code>gestorStorageNoticeSeen</code></td><td>Recordar que ya viste este aviso.</td><td>Hasta que lo borres</td></tr>
@@ -200,8 +207,9 @@
     {:else}
       <h2>1. Prueba gratis antes de pagar</h2>
       <p>
-        Todos los planes incluyen un período de prueba gratis (por ejemplo, 10 días en el plan Mensual y 20 días en el de
-        6 Meses) para que evalúes el servicio antes de pagar. No pedimos tarjeta para empezar.
+        Al registrarte tienes un período de prueba gratis para evaluar el servicio antes de pagar: 7 días, o 10 días si
+        eliges la prueba del plan Mensual (los días ya usados se descuentan). Los planes de 6 Meses y Anual se contratan
+        directamente, sin prueba. No pedimos tarjeta para empezar.
       </p>
 
       <h2>2. Pagos no reembolsables</h2>

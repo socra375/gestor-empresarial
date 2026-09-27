@@ -96,3 +96,23 @@ jobs:
 
       - name: Pruebas
         run: deno test commands_test.ts
+
+  # Aviso por Telegram de registros nuevos (Supabase Edge Function, Deno).
+  notify-signup:
+    name: supabase/functions/notify-signup (tipos, pruebas)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: supabase/functions/notify-signup
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Tipos
+        run: deno check index.ts message.ts message_test.ts
+
+      - name: Pruebas
+        run: deno test message_test.ts

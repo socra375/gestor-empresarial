@@ -34,7 +34,7 @@ const businessAccessMock = vi.hoisted(() => ({
   getMyBusinessAccess: vi.fn(),
 }));
 vi.mock('../../../src/lib/api/businessAccess', () => businessAccessMock);
-const ACTIVE_ACCESS = { status: 'active', plan: 'anual', expires_at: '2027-09-25T00:00:00Z', reason: null, is_super_admin: false };
+const ACTIVE_ACCESS = { status: 'active', plan: 'anual', expires_at: '2027-09-25T00:00:00Z', reason: null, is_super_admin: false, modules: ['facturas', 'equipo', 'estadisticas'], trial_plan: null };
 
 const {
   readPendingInviteFromUrl,
@@ -75,6 +75,13 @@ describe('readPendingInviteFromUrl', () => {
 });
 
 describe('buildSignUpRedirectUrl', () => {
+  it('agrega el plan elegido en la landing para que sobreviva a la confirmación del correo', () => {
+    expect(buildSignUpRedirectUrl('https://app.test/', null, 'semestral')).toBe('https://app.test/?plan=semestral');
+    const url = new URL(buildSignUpRedirectUrl('https://app.test/', { code: 'EMP1', employeeName: 'Ana' }, 'anual'));
+    expect(url.searchParams.get('invite')).toBe('EMP1');
+    expect(url.searchParams.get('plan')).toBe('anual');
+  });
+
   it('sin invitación, devuelve la URL base tal cual', () => {
     expect(buildSignUpRedirectUrl('https://app.test/', null)).toBe('https://app.test/');
   });

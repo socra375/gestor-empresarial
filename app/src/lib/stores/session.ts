@@ -1,6 +1,6 @@
 import { writable, derived } from 'svelte/store';
 import type { Tables } from '../types/database.types';
-import { LOCKED_STATUSES, type BusinessAccess } from '../types/businessAccess';
+import { ALL_MODULES, LOCKED_STATUSES, type BusinessAccess, type ModuleKey } from '../types/businessAccess';
 
 /**
  * Regla de la Fase 5 (ver plan): un store representa estado compartido, no
@@ -27,6 +27,12 @@ export const businessAccess = writable<BusinessAccess | null>(null);
 export const isBusinessBlocked = derived(
   businessAccess,
   ($access) => $access !== null && LOCKED_STATUSES.includes($access.status)
+);
+
+/** Módulos activos del negocio. Mientras no se conoce el acceso, todos (evita parpadeos). */
+export const enabledModules = derived(
+  businessAccess,
+  ($access): ReadonlySet<ModuleKey> => new Set($access?.modules ?? ALL_MODULES)
 );
 
 export function resetSession(): void {
