@@ -210,7 +210,7 @@ export function buildInvoicePdf(params: InvoicePdfParams): jsPDF {
     doc.text(String(val), fx, y + 5);
   });
 
-  // Este PDF no es un comprobante fiscal (en RD, el e-CF de la DGII): se
+  // Este PDF no es un comprobante fiscal (hay negocios de varios países): se
   // aclara siempre para que nadie lo use como factura con valor tributario.
   y += 16;
   doc.setFont('helvetica', 'italic');

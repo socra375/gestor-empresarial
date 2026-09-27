@@ -80,7 +80,7 @@ describe('buildInvoicePdf', () => {
     expect(doc.getNumberOfPages()).toBe(1);
   });
 
-  it('aclara que es un comprobante interno sin valor fiscal (no reemplaza el e-CF)', () => {
+  it('aclara que es un comprobante interno sin valor fiscal', () => {
     const doc = buildInvoicePdf({
       invoice,
       apptServices: [corte],
@@ -93,7 +93,6 @@ describe('buildInvoicePdf', () => {
     // jsPDF escribe el texto sin comprimir dentro del PDF.
     const pdfSource = doc.output();
     expect(pdfSource).toContain('sin valor fiscal');
-    expect(pdfSource).toContain('e-CF');
   });
 
   it('con un logo inválido, no lanza -- se omite y sigue generando el PDF', () => {

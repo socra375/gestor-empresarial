@@ -14,7 +14,7 @@ describe('PlanTab', () => {
 
     expect(link.href).toMatch(/^https:\/\/wa\.me\/18299788249\?text=/);
     expect(decodeURIComponent(link.href.split('text=')[1] ?? '')).toBe(
-      'Hola, quiero solicitar un cambio de plan para mi negocio en Gestión Salón.'
+      'Hola, quiero solicitar un cambio de plan para mi negocio en Gestor Empresarial.'
     );
     expect(link.target).toBe('_blank');
     expect(link.rel).toContain('noopener');
