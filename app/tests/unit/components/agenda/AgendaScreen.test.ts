@@ -77,6 +77,7 @@ afterEach(() => cleanup());
 
 beforeEach(() => {
   vi.clearAllMocks();
+  localStorage.clear();
   currentBusinessId.set('biz-1');
   currentBusiness.set({ id: 'biz-1', name: 'Mi Salón' } as never);
   appointments.set([]);
@@ -204,6 +205,66 @@ describe('AgendaScreen', () => {
     await fireEvent.input(screen.getByLabelText('Fecha'), { target: { value: otherDate } });
 
     expect(screen.getByText(/Citas del/)).toBeTruthy();
+  });
+
+  describe('recordatorios por WhatsApp', () => {
+    function tomorrowAt(hour: number) {
+      const d = new Date();
+      d.setDate(d.getDate() + 1);
+      d.setHours(hour, 0, 0, 0);
+      return d.toISOString();
+    }
+    const ana = { id: 'cust-1', business_id: 'biz-1', name: 'Ana Pérez', phone: '809-555-1234', notes: null, address: null, email: null, created_at: null };
+    const tomorrowAppt = {
+      ...pendingAppt,
+      id: 'appt-manana',
+      customer_id: 'cust-1',
+      notes: null,
+      status: 'confirmada',
+      start_at: tomorrowAt(15),
+      end_at: tomorrowAt(16),
+    };
+
+    it('avisa cuántas citas de mañana falta recordar y lleva a ese día', async () => {
+      customers.set([ana]);
+      appointments.set([tomorrowAppt]);
+      currentBusiness.set({ id: 'biz-1', name: 'Salón Demo', address: 'Av. Duarte 123' } as never);
+      render(AgendaScreen);
+
+      expect(await screen.findByText('Mañana tienes 1 cita(s) para recordar por WhatsApp.')).toBeTruthy();
+      await fireEvent.click(screen.getByRole('button', { name: 'Ver mañana' }));
+
+      const link = await screen.findByRole('link', { name: 'Recordar por WhatsApp' });
+      const href = link.getAttribute('href') ?? '';
+      expect(href.startsWith('https://wa.me/18095551234?text=')).toBe(true);
+      const message = decodeURIComponent(href.split('text=')[1] ?? '');
+      expect(message).toContain('Hola Ana Pérez');
+      expect(message).toContain('Salón Demo');
+      expect(message).toContain('Corte');
+      expect(message).toContain('📍 Av. Duarte 123.');
+      expect(link.getAttribute('target')).toBe('_blank');
+    });
+
+    it('al tocarlo queda marcado como recordado y el aviso desaparece', async () => {
+      customers.set([ana]);
+      appointments.set([tomorrowAppt]);
+      render(AgendaScreen);
+      await fireEvent.click(await screen.findByRole('button', { name: 'Ver mañana' }));
+
+      await fireEvent.click(await screen.findByRole('link', { name: 'Recordar por WhatsApp' }));
+
+      expect(await screen.findByRole('link', { name: '✓ Recordado · reenviar' })).toBeTruthy();
+      expect(screen.queryByText(/para recordar por WhatsApp/)).toBeNull();
+    });
+
+    it('sin teléfono del cliente (o en una cita sin cliente) no hay botón', async () => {
+      customers.set([{ ...ana, phone: null }]);
+      appointments.set([tomorrowAppt, { ...pendingAppt, start_at: tomorrowAt(10), end_at: tomorrowAt(11) }]);
+      render(AgendaScreen);
+
+      expect(screen.queryByText(/para recordar por WhatsApp/)).toBeNull();
+      expect(screen.queryByRole('link', { name: 'Recordar por WhatsApp' })).toBeNull();
+    });
   });
 
   it('sin violaciones de accesibilidad (axe-core), con el formulario y el modal de pago abiertos', async () => {
