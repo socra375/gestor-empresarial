@@ -119,7 +119,7 @@
         <div class="field">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 000 4v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2a2 2 0 000-4V8z" /></svg>
           <label for="auth-invite-code" class="sr-only">{$t('auth.invite_label')}</label>
-          <input id="auth-invite-code" type="text" placeholder={$t('auth.invite_label')} bind:value={inviteCode} />
+          <input id="auth-invite-code" type="text" maxlength="64" autocomplete="off" placeholder={$t('auth.invite_label')} bind:value={inviteCode} />
         </div>
 
         {#if showEmployeeNameField}
@@ -129,7 +129,7 @@
             <!-- Sin `required`: la validación de este campo la hace handleSubmit
                  (mismo criterio que el legado, con su propio mensaje traducido);
                  el `required` nativo bloquearía el submit antes de mostrarlo. -->
-            <input id="auth-employee-name" type="text" placeholder={$t('auth.fullname_label')} bind:value={employeeName} />
+            <input id="auth-employee-name" type="text" maxlength="120" autocomplete="name" placeholder={$t('auth.fullname_label')} bind:value={employeeName} />
           </div>
         {/if}
 

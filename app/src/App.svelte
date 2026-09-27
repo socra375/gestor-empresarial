@@ -28,6 +28,7 @@
   import ForcedPasswordModal from './lib/components/auth/ForcedPasswordModal.svelte';
   import BlockedScreen from './lib/components/auth/BlockedScreen.svelte';
   import { isPaidPlan, setPendingTrial } from './lib/utils/pendingTrial';
+  import { showsLandingAfter } from './lib/utils/landing';
   import type { PaidPlan } from './lib/types/businessAccess';
   import DashboardScreen from './lib/components/dashboard/DashboardScreen.svelte';
   import AgendaScreen from './lib/components/agenda/AgendaScreen.svelte';
@@ -188,7 +189,7 @@
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
         // onAuthStateChange dispara de nuevo en cada refresh de token; ya
         // resuelta una vez la sesión, los siguientes eventos son no-ops.
@@ -214,6 +215,10 @@
             finishBoot();
           });
       } else {
+        if (showsLandingAfter(event)) {
+          showLanding = true;
+          window.scrollTo(0, 0);
+        }
         resetSession();
         finishBoot();
       }

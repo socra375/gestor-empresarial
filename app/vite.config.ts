@@ -1,5 +1,5 @@
 /// <reference types="vitest/config" />
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 
 // GitHub Pages de proyecto sirve desde /<nombre-del-repo>/, no desde la raíz
@@ -15,9 +15,42 @@ import { svelte } from '@sveltejs/vite-plugin-svelte';
 // tests y `npm run dev` no la definen, así que siguen con el prefijo.
 const BASE = process.env.VERCEL ? '/' : '/gestor-empresarial/';
 
+// Política de seguridad de contenido (CSP) como <meta>, porque GitHub Pages
+// no deja poner encabezados: aunque alguien lograra meter HTML en la página,
+// el navegador no ejecuta scripts que no vengan del propio sitio, ni manda
+// datos a otro servidor que no sea Supabase. Solo en el build: el servidor de
+// desarrollo inyecta scripts propios para recargar en caliente.
+// 'unsafe-inline' en estilos hace falta por los style="…" de los componentes;
+// blob: en object-src deja abrir el PDF de las facturas.
+const CONTENT_SECURITY_POLICY = [
+  "default-src 'self'",
+  "script-src 'self'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https://*.supabase.co https://*.googleusercontent.com",
+  "font-src 'self' data:",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+  "object-src 'self' blob:",
+  "base-uri 'self'",
+  "form-action 'self'",
+].join('; ');
+
+function contentSecurityPolicy(): Plugin {
+  return {
+    name: 'gestor-content-security-policy',
+    apply: 'build',
+    transformIndexHtml: () => [
+      {
+        tag: 'meta',
+        attrs: { 'http-equiv': 'Content-Security-Policy', content: CONTENT_SECURITY_POLICY },
+        injectTo: 'head-prepend',
+      },
+    ],
+  };
+}
+
 export default defineConfig({
   base: BASE,
-  plugins: [svelte()],
+  plugins: [svelte(), contentSecurityPolicy()],
   // Sin esto, Vitest resuelve los componentes .svelte a su build de
   // servidor (SSR) en vez del de navegador -- @testing-library/svelte
   // necesita el de navegador para poder montar el componente en jsdom.
