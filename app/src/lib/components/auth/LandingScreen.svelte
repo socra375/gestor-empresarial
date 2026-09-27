@@ -43,7 +43,7 @@
       </nav>
 
       <div class="hero-copy">
-        <h1><span>Organiza tu salón.</span><span>Controla tus citas.</span><span>Conoce tu negocio.</span></h1>
+        <h1><span>Organiza tu negocio.</span><span>Controla tus citas.</span><span>Conoce tu empresa.</span></h1>
         <p>Agenda, clientes, pagos y estadísticas de tu salón, peluquería o spa en un solo lugar.</p>
         <div class="actions">
           <button type="button" class="btn btn-primary" onclick={() => onEnter()}>Probar gratis</button>
